@@ -3,20 +3,20 @@ namespace Lichv\Entrust;
 
 /**
  * This file is part of Entrust,
- * a role & permission management solution for Laravel.
+ * a group & user & role management solution for Laravel.
  *
  * @license MIT
  * @package Lichv\Entrust
  */
 
-use Lichv\Entrust\Contracts\EntrustPermissionInterface;
-use Lichv\Entrust\Traits\EntrustPermissionTrait;
+use Lichv\Entrust\Contracts\EntrustGroupInterface;
+use Lichv\Entrust\Traits\EntrustGroupTrait;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Config;
 
-class EntrustPermission extends Model implements EntrustPermissionInterface
+class EntrustGroup extends Model implements EntrustGroupInterface
 {
-    use EntrustPermissionTrait;
+    use EntrustGroupTrait;
 
     /**
      * The database table used by the model.
@@ -33,7 +33,7 @@ class EntrustPermission extends Model implements EntrustPermissionInterface
     public function __construct(array $attributes = [])
     {
         parent::__construct($attributes);
-        $this->table = Config::get('entrust.permissions_table');
+        $this->table = Config::get('entrust.groups_table');
     }
 
 }

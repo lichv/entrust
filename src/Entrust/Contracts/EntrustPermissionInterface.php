@@ -1,4 +1,5 @@
-<?php namespace Lichv\Entrust\Contracts;
+<?php
+namespace Lichv\Entrust\Contracts;
 
 /**
  * This file is part of Entrust,

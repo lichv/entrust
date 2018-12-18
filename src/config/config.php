@@ -129,4 +129,60 @@ return [
     |
     */
     'permission_foreign_key' => 'permission_id',
+
+    /*
+    |--------------------------------------------------------------------------
+    | Application Group Model
+    |--------------------------------------------------------------------------
+    |
+    | This is the Group model used by Entrust to create correct relations.
+    | Update the Group if it is in a different namespace.
+    |
+    */
+    'group' => 'App\Group',
+
+    /*
+    |--------------------------------------------------------------------------
+    | Entrust groups Table
+    |--------------------------------------------------------------------------
+    |
+    | This is the groups table used by Entrust to save assigned groups to the
+    | database.
+    |
+    */
+    'groups_table' => 'groups',
+
+    /*
+    |--------------------------------------------------------------------------
+    | Entrust group_user Table
+    |--------------------------------------------------------------------------
+    |
+    | This is the group_user table used by Entrust to save assigned users to the
+    | database.
+    |
+    */
+    'group_user_table' => 'group_user',
+
+    /*
+    |--------------------------------------------------------------------------
+    | Entrust role_group Table
+    |--------------------------------------------------------------------------
+    |
+    | This is the role_group table used by Entrust to save assigned roles to the
+    | database.
+    |
+    */
+    'role_group_table' => 'role_group',
+
+    /*
+    |--------------------------------------------------------------------------
+    | Entrust Group foreign key
+    |--------------------------------------------------------------------------
+    |
+    | This is the group foreign key used by Entrust to make a proper
+    | relation between groups and roles
+    |
+    */
+    'group_foreign_key' => 'group_id',
+
 ];

@@ -1,4 +1,5 @@
-<?php namespace Lichv\Entrust\Traits;
+<?php
+namespace Lichv\Entrust\Traits;
 
 /**
  * This file is part of Entrust,
@@ -12,16 +13,6 @@ use Illuminate\Support\Facades\Config;
 
 trait EntrustPermissionTrait
 {
-    /**
-     * Many-to-Many relations with role model.
-     *
-     * @return \Illuminate\Database\Eloquent\Relations\BelongsToMany
-     */
-    public function roles()
-    {
-        return $this->belongsToMany(Config::get('entrust.role'), Config::get('entrust.permission_role_table'), Config::get('entrust.permission_foreign_key'), Config::get('entrust.role_foreign_key'));
-    }
-
     /**
      * Boot the permission model
      * Attach event listener to remove the many-to-many records when trying to delete
@@ -41,4 +32,16 @@ trait EntrustPermissionTrait
             return true;
         });
     }
+    
+    /**
+     * Many-to-Many relations with role model.
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\BelongsToMany
+     */
+    public function roles()
+    {
+        return $this->belongsToMany(Config::get('entrust.role'), Config::get('entrust.permission_role_table'), Config::get('entrust.permission_foreign_key'), Config::get('entrust.role_foreign_key'));
+    }
+
+    
 }

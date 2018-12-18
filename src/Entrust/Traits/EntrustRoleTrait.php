@@ -1,4 +1,5 @@
-<?php namespace Lichv\Entrust\Traits;
+<?php
+namespace Lichv\Entrust\Traits;
 
 /**
  * This file is part of Entrust,
@@ -14,6 +15,28 @@ use Illuminate\Support\Facades\Cache;
 
 trait EntrustRoleTrait
 {
+
+    /**
+     * Boot the role model
+     * Attach event listener to remove the many-to-many records when trying to delete
+     * Will NOT delete any records if the role model uses soft deletes.
+     *
+     * @return void|bool
+     */
+    public static function boot()
+    {
+        parent::boot();
+
+        static::deleting(function ($role) {
+            if (!method_exists(Config::get('entrust.role'), 'bootSoftDeletes')) {
+                $role->users()->sync([]);
+                $role->perms()->sync([]);
+            }
+
+            return true;
+        });
+    }
+
     //Big block of caching functionality.
     public function cachedPermissions()
     {
@@ -70,6 +93,16 @@ trait EntrustRoleTrait
     }
 
     /**
+     * Many-to-Many relations with the group model.
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\BelongsToMany
+     */
+    public function groups()
+    {
+        return $this->belongsToMany(Config::get('entrust.group'), Config::get('entrust.role_group_table'), Config::get('entrust.role_foreign_key'), Config::get('entrust.group_foreign_key'));
+    }
+
+    /**
      * Many-to-Many relations with the permission model.
      * Named "perms" for backwards compatibility. Also because "perms" is short and sweet.
      *
@@ -80,26 +113,6 @@ trait EntrustRoleTrait
         return $this->belongsToMany(Config::get('entrust.permission'), Config::get('entrust.permission_role_table'), Config::get('entrust.role_foreign_key'), Config::get('entrust.permission_foreign_key'));
     }
 
-    /**
-     * Boot the role model
-     * Attach event listener to remove the many-to-many records when trying to delete
-     * Will NOT delete any records if the role model uses soft deletes.
-     *
-     * @return void|bool
-     */
-    public static function boot()
-    {
-        parent::boot();
-
-        static::deleting(function ($role) {
-            if (!method_exists(Config::get('entrust.role'), 'bootSoftDeletes')) {
-                $role->users()->sync([]);
-                $role->perms()->sync([]);
-            }
-
-            return true;
-        });
-    }
 
     /**
      * Checks if the role has a permission by its name.

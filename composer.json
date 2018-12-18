@@ -6,19 +6,7 @@
     "authors": [
         {
             "name": "Lichv",
-            "email": "lichvy@gmail.com"
-        },
-        {
-            "name": "Andrew Elkins",
-            "homepage": "http://andrewelkins.com"
-        },
-        {
-            "name": "Ben Batschelet",
-            "homepage": "http://github.com/bbatsche"
-        },
-        {
-            "name": "Michele Angioni",
-            "email": "michele.angioni@gmail.com"
+            "email": "lichvg@gmail.com"
         }
     ],
     "require": {

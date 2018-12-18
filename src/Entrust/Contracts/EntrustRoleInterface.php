@@ -1,4 +1,5 @@
-<?php namespace Lichv\Entrust\Contracts;
+<?php
+namespace Lichv\Entrust\Contracts;
 
 /**
  * This file is part of Entrust,
@@ -16,6 +17,13 @@ interface EntrustRoleInterface
      * @return \Illuminate\Database\Eloquent\Relations\BelongsToMany
      */
     public function users();
+
+    /**
+     * Many-to-Many relations with the group model.
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\BelongsToMany
+     */
+    public function groups();
 
     /**
      * Many-to-Many relations with the permission model.

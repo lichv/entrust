@@ -1,4 +1,5 @@
-<?php namespace Lichv\Entrust\Traits;
+<?php
+namespace Lichv\Entrust\Traits;
 
 /**
  * This file is part of Entrust,
@@ -15,68 +16,6 @@ use InvalidArgumentException;
 
 trait EntrustUserTrait
 {
-    /**
-     * Big block of caching functionality.
-     *
-     * @return mixed Roles
-     */
-    public function cachedRoles()
-    {
-        $userPrimaryKey = $this->primaryKey;
-        $cacheKey = 'entrust_roles_for_user_'.$this->$userPrimaryKey;
-        if(Cache::getStore() instanceof TaggableStore) {
-            return Cache::tags(Config::get('entrust.role_user_table'))->remember($cacheKey, Config::get('cache.ttl'), function () {
-                return $this->roles()->get();
-            });
-        }
-        else return $this->roles()->get();
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    public function save(array $options = [])
-    {   //both inserts and updates
-        if(Cache::getStore() instanceof TaggableStore) {
-            Cache::tags(Config::get('entrust.role_user_table'))->flush();
-        }
-        return parent::save($options);
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    public function delete(array $options = [])
-    {   //soft or hard
-        $result = parent::delete($options);
-        if(Cache::getStore() instanceof TaggableStore) {
-            Cache::tags(Config::get('entrust.role_user_table'))->flush();
-        }
-        return $result;
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    public function restore()
-    {   //soft delete undo's
-        $result = parent::restore();
-        if(Cache::getStore() instanceof TaggableStore) {
-            Cache::tags(Config::get('entrust.role_user_table'))->flush();
-        }
-        return $result;
-    }
-
-    /**
-     * Many-to-Many relations with Role.
-     *
-     * @return \Illuminate\Database\Eloquent\Relations\BelongsToMany
-     */
-    public function roles()
-    {
-        return $this->belongsToMany(Config::get('entrust.role'), Config::get('entrust.role_user_table'), Config::get('entrust.user_foreign_key'), Config::get('entrust.role_foreign_key'));
-    }
-
     /**
      * Boot the user model
      * Attach event listener to remove the many-to-many records when trying to delete
@@ -96,6 +35,101 @@ trait EntrustUserTrait
             return true;
         });
     }
+
+    /**
+     * {@inheritDoc}
+     */
+    public function save(array $options = [])
+    {   //both inserts and updates
+        if(Cache::getStore() instanceof TaggableStore) {
+            Cache::tags(Config::get('entrust.role_user_table'))->flush();
+            Cache::tags(Config::get('entrust.group_user_table'))->flush();
+        }
+        return parent::save($options);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public function delete(array $options = [])
+    {   //soft or hard
+        $result = parent::delete($options);
+        if(Cache::getStore() instanceof TaggableStore) {
+            Cache::tags(Config::get('entrust.role_user_table'))->flush();
+            Cache::tags(Config::get('entrust.group_user_table'))->flush();
+        }
+        return $result;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public function restore()
+    {   //soft delete undo's
+        $result = parent::restore();
+        if(Cache::getStore() instanceof TaggableStore) {
+            Cache::tags(Config::get('entrust.role_user_table'))->flush();
+            Cache::tags(Config::get('entrust.group_user_table'))->flush();
+        }
+        return $result;
+    }
+
+    /**
+     * Many-to-Many relations with Role.
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\BelongsToMany
+     */
+    public function roles()
+    {
+        return $this->belongsToMany(Config::get('entrust.role'), Config::get('entrust.role_user_table'), Config::get('entrust.user_foreign_key'), Config::get('entrust.role_foreign_key'));
+    }
+
+    /**
+     * Many-to-Many relations with Group.
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\BelongsToMany
+     */
+    public function groups()
+    {
+        return $this->belongsToMany(Config::get('entrust.group'), Config::get('entrust.group_user_table'), Config::get('entrust.user_foreign_key'), Config::get('entrust.group_foreign_key'));
+    }
+
+
+    /**
+     * Big block of caching functionality.
+     *
+     * @return mixed Roles
+     */
+    public function cachedRoles()
+    {
+        $userPrimaryKey = $this->primaryKey;
+        $cacheKey = 'entrust_roles_for_user_'.$this->$userPrimaryKey;
+        if(Cache::getStore() instanceof TaggableStore) {
+            return Cache::tags(Config::get('entrust.role_user_table'))->remember($cacheKey, Config::get('cache.ttl'), function () {
+                return $this->roles()->get();
+            });
+        }
+        else return $this->roles()->get();
+    }
+
+    /**
+     * Big block of caching functionality.
+     *
+     * @return mixed Roles
+     */
+    public function cachedGroups()
+    {
+        $userPrimaryKey = $this->primaryKey;
+        $cacheKey = 'entrust_groups_for_user_'.$this->$userPrimaryKey;
+        if(Cache::getStore() instanceof TaggableStore) {
+            return Cache::tags(Config::get('entrust.group_user_table'))->remember($cacheKey, Config::get('cache.ttl'), function () {
+                return $this->groups()->get();
+            });
+        }
+        else return $this->groups()->get();
+    }
+
+    
 
     /**
      * Checks if the user has a role by its name.
@@ -134,6 +168,42 @@ trait EntrustUserTrait
     }
 
     /**
+     * Checks if the user has a group by its name.
+     *
+     * @param string|array $name       Group name or array of group names.
+     * @param bool         $requireAll All roles in the array are required.
+     *
+     * @return bool
+     */
+    public function hasGroup($name, $requireAll = false)
+    {
+        if (is_array($name)) {
+            foreach ($name as $groupName) {
+                $hasGroup = $this->hasRole($groupName);
+
+                if ($hasGroup && !$requireAll) {
+                    return true;
+                } elseif (!$hasGroup && $requireAll) {
+                    return false;
+                }
+            }
+
+            // If we've made it this far and $requireAll is FALSE, then NONE of the roles were found
+            // If we've made it this far and $requireAll is TRUE, then ALL of the roles were found.
+            // Return the value of $requireAll;
+            return $requireAll;
+        } else {
+            foreach ($this->cachedGroups() as $group) {
+                if ($group->name == $name) {
+                    return true;
+                }
+            }
+        }
+
+        return false;
+    }
+
+    /**
      * Check if user has a permission by its name.
      *
      * @param string|array $permission Permission string or array of permissions.
@@ -159,14 +229,26 @@ trait EntrustUserTrait
             // Return the value of $requireAll;
             return $requireAll;
         } else {
-            foreach ($this->cachedRoles() as $role) {
-                // Validate against the Permission table
-                foreach ($role->cachedPermissions() as $perm) {
-                    if (str_is( $permission, $perm->name) ) {
-                        return true;
+            $roles = $this->cachedRoles();
+            $groups = $this->cachedGroups();
+            $tmp = null;
+            if (!empty($groups)) {
+                foreach($groups as $group){
+                    $new_roles = $group->cachedRoles();
+                    $roles = $roles->merge($new_roles);
+                }
+            }
+            if (!empty($roles)) {
+                foreach ($roles as $role) {
+                    // Validate against the Permission table
+                    foreach ($role->cachedPermissions() as $perm) {
+                        if (str_is( $permission, $perm->name) ) {
+                            return true;
+                        }
                     }
                 }
             }
+                
         }
 
         return false;
@@ -261,6 +343,24 @@ trait EntrustUserTrait
     }
 
     /**
+     * Alias to eloquent many-to-many relation's attach() method.
+     *
+     * @param mixed $group
+     */
+    public function attachGroup($group)
+    {
+        if(is_object($group)) {
+            $group = $group->getKey();
+        }
+
+        if(is_array($group)) {
+            $group = $group['id'];
+        }
+
+        $this->groups()->attach($group);
+    }
+
+    /**
      * Alias to eloquent many-to-many relation's detach() method.
      *
      * @param mixed $role
@@ -279,6 +379,24 @@ trait EntrustUserTrait
     }
 
     /**
+     * Alias to eloquent many-to-many relation's detach() method.
+     *
+     * @param mixed $group
+     */
+    public function detachGroup($group)
+    {
+        if (is_object($group)) {
+            $group = $group->getKey();
+        }
+
+        if (is_array($group)) {
+            $group = $group['id'];
+        }
+
+        $this->groups()->detach($group);
+    }
+
+    /**
      * Attach multiple roles to a user
      *
      * @param mixed $roles
@@ -287,6 +405,19 @@ trait EntrustUserTrait
     {
         foreach ($roles as $role) {
             $this->attachRole($role);
+        }
+    }
+
+
+    /**
+     * Attach multiple groups to a user
+     *
+     * @param mixed $groups
+     */
+    public function attachGroups($groups)
+    {
+        foreach ($groups as $group) {
+            $this->attachGroup($group);
         }
     }
 
@@ -305,6 +436,20 @@ trait EntrustUserTrait
     }
 
     /**
+     * Detach multiple groups from a user
+     *
+     * @param mixed $groups
+     */
+    public function detachGroups($groups=null)
+    {
+        if (!$groups) $groups = $this->groups()->get();
+
+        foreach ($groups as $group) {
+            $this->detachGroup($group);
+        }
+    }
+
+    /**
      *Filtering users according to their role 
      *
      *@param string $role
@@ -315,6 +460,20 @@ trait EntrustUserTrait
         return $query->whereHas('roles', function ($query) use ($role)
         {
             $query->where('name', $role);
+        });
+    }
+
+    /**
+     *Filtering users according to their group 
+     *
+     *@param string $group
+     *@return users collection
+     */
+    public function scopeWithGroup($query, $group)
+    {
+        return $query->whereHas('groups', function ($query) use ($group)
+        {
+            $query->where('name', $group);
         });
     }
 

@@ -1,4 +1,5 @@
-<?php namespace Lichv\Entrust\Middleware;
+<?php
+namespace Lichv\Entrust\Middleware;
 
 /**
  * This file is part of Entrust,

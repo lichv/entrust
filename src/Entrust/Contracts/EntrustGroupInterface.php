@@ -9,7 +9,7 @@ namespace Lichv\Entrust\Contracts;
  * @package Lichv\Entrust
  */
 
-interface EntrustUserInterface
+interface EntrustGroupInterface
 {
     /**
      * Many-to-Many relations with Role.
@@ -18,13 +18,12 @@ interface EntrustUserInterface
      */
     public function roles();
 
-
     /**
      * Many-to-Many relations with Group.
      *
      * @return \Illuminate\Database\Eloquent\Relations\BelongsToMany
      */
-    public function groups();
+    public function users();
 
     /**
      * Checks if the user has a role by its name.
@@ -37,37 +36,14 @@ interface EntrustUserInterface
     public function hasRole($name, $requireAll = false);
 
     /**
-     * Checks if the user has a group by its name.
+     * Checks if the user has a role by its name.
      *
-     * @param string|array $name       Group name or array of role names.
+     * @param interge|array $name       Role name or array of role names.
      * @param bool         $requireAll All roles in the array are required.
      *
      * @return bool
      */
-    public function hasGroup($name, $requireAll = false);
-
-    /**
-     * Check if user has a permission by its name.
-     *
-     * @param string|array $permission Permission string or array of permissions.
-     * @param bool         $requireAll All permissions in the array are required.
-     *
-     * @return bool
-     */
-    public function can($permission, $requireAll = false);
-
-    /**
-     * Checks role(s) and permission(s).
-     *
-     * @param string|array $roles       Array of roles or comma separated string
-     * @param string|array $permissions Array of permissions or comma separated string.
-     * @param array        $options     validate_all (true|false) or return_type (boolean|array|both)
-     *
-     * @throws \InvalidArgumentException
-     *
-     * @return array|bool
-     */
-    public function ability($roles, $permissions, $options = []);
+    public function hasUser($user, $requireAll = false);
 
     /**
      * Alias to eloquent many-to-many relation's attach() method.
@@ -79,9 +55,9 @@ interface EntrustUserInterface
     /**
      * Alias to eloquent many-to-many relation's attach() method.
      *
-     * @param mixed $group
+     * @param mixed $role
      */
-    public function attachGroup($group);
+    public function attachUser($user);
 
     /**
      * Alias to eloquent many-to-many relation's detach() method.
@@ -95,7 +71,7 @@ interface EntrustUserInterface
      *
      * @param mixed $role
      */
-    public function detachGroup($group);
+    public function detachUser($user);
 
     /**
      * Attach multiple roles to a user
@@ -109,7 +85,7 @@ interface EntrustUserInterface
      *
      * @param mixed $roles
      */
-    public function attachGroups($groups);
+    public function attachUsers($users);
 
     /**
      * Detach multiple roles from a user
@@ -123,5 +99,5 @@ interface EntrustUserInterface
      *
      * @param mixed $roles
      */
-    public function detachGroups($groups);
+    public function detachUsers($users);
 }

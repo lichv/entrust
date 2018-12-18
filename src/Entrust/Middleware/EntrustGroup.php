@@ -12,7 +12,7 @@ namespace Lichv\Entrust\Middleware;
 use Closure;
 use Illuminate\Contracts\Auth\Guard;
 
-class EntrustRole
+class EntrustGroup
 {
 	const DELIMITER = '|';
 
@@ -36,13 +36,13 @@ class EntrustRole
 	 * @param  $roles
 	 * @return mixed
 	 */
-	public function handle($request, Closure $next, $roles)
+	public function handle($request, Closure $next, $groups)
 	{
-		if (!is_array($roles)) {
-			$roles = explode(self::DELIMITER, $roles);
+		if (!is_array($groups)) {
+			$groups = explode(self::DELIMITER, $groups);
 		}
 
-		if ($this->auth->guest() || !$request->user()->hasRole($roles)) {
+		if ($this->auth->guest() || !$request->user()->hasGroup($groups)) {
 			abort(403);
 		}
 
