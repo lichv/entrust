@@ -182,7 +182,8 @@ trait EntrustGroupTrait
             return $requireAll;
         } else {
             foreach ($this->cachedUsers() as $user) {
-                if ($user->id == $user) {
+                $value = property_exists($user, 'name')?$user->name:(property_exists($user, 'username')?$user->username:$user->id);
+                if ($value == $user) {
                     return true;
                 }
             }
