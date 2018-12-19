@@ -51,7 +51,7 @@ class MigrationCommand extends Command
         $roleUserTable       = Config::get('entrust.role_user_table');
         $groupsTable          = Config::get('entrust.groups_table');
         $groupUserTable          = Config::get('entrust.group_user_table');
-        $roleGroupTable          = Config::get('entrust.role_grop_table');
+        $roleGroupTable          = Config::get('entrust.role_group_table');
         $permissionsTable    = Config::get('entrust.permissions_table');
         $permissionRoleTable = Config::get('entrust.permission_role_table');
 
